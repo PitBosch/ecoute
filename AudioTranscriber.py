@@ -37,6 +37,11 @@ class AudioTranscriber:
             }
         }
 
+    def update_model(self, new_model):
+        """Aggiorna il modello di trascrizione"""
+        self.audio_model = new_model
+        print(f"[INFO] Modello di trascrizione aggiornato")
+
     def transcribe_audio_queue(self, speaker_queue, mic_queue):
         import queue
         

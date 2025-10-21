@@ -1,104 +1,188 @@
+# Ecoute - Riconoscimento Vocale Multilingue
 
-# 🎧 Ecoute
+Ecoute è un'applicazione di riconoscimento vocale in tempo reale che supporta multiple lingue, inclusa l'italiano. L'applicazione può trascrivere sia l'audio dal microfono che l'audio riprodotto dagli altoparlanti del sistema.
 
-Ecoute is a live transcription tool that provides real-time transcripts for both the user's microphone input (You) and the user's speakers output (Speaker) in a textbox.
+## Caratteristiche
 
-## 📖 Demo
+- **Supporto Multilingue**: Italiano, Inglese, Spagnolo, Francese, Tedesco, Portoghese, Hindi, Olandese
+- **Riconoscimento in Tempo Reale**: Trascrizione simultanea di microfono e altoparlanti
+- **Interfaccia Grafica Moderna**: UI intuitiva con PyQt6 e CustomTkinter
+- **Modelli Avanzati**: 
+  - 🚀 **Voxtral-Mini-3B-2507** (Nuovo!) - Comprensione audio avanzata
+  - Faster Whisper locali
+  - OpenVINO Whisper ottimizzato 
+  - OpenAI Whisper API
+  - Ollama Whisper
+- **Cambio Lingua Dinamico**: Possibilità di cambiare lingua durante l'uso
+- **Database Locale**: Salvataggio automatico delle trascrizioni
 
-https://github.com/user-attachments/assets/5616421f-838d-439f-8b15-0df7b8d33459
+## Installazione
 
-Ecoute is designed to help users in their conversations by providing live transcriptions.
-
-## 🚀 Getting Started
-
-Follow these steps to set up and run Ecoute on your local machine.
-
-### 📋 Prerequisites
-
-- Python >=3.8.0
-- (Optional) An OpenAI API key that can access Whisper API (set up a paid account OpenAI account)
-- Windows OS (Not tested on others)
-- FFmpeg 
-
-If FFmpeg is not installed in your system, you can follow the steps below to install it.
-
-First, you need to install Chocolatey, a package manager for Windows. Open your PowerShell as Administrator and run the following command:
-```
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-```
-Once Chocolatey is installed, you can install FFmpeg by running the following command in your PowerShell:
-```
-choco install ffmpeg
-```
-Please ensure that you run these commands in a PowerShell window with administrator privileges. If you face any issues during the installation, you can visit the official Chocolatey and FFmpeg websites for troubleshooting.
-
-### 🔧 Installation
-
-1. Clone the repository:
-
-   ```
-   git clone https://github.com/SevaSk/ecoute
-   ```
-
-2. Navigate to the `ecoute` folder:
-
-   ```
+1. **Clona il repository**:
+   ```bash
+   git clone <repository-url>
    cd ecoute
    ```
 
-3. Install the required packages:
-
-   ```
+2. **Installa le dipendenze**:
+   ```bash
    pip install -r requirements.txt
    ```
-   
-4. (Optional) Create a `keys.py` file in the ecoute directory and add your OpenAI API key:
 
-   - Option 1: You can utilize a command on your command prompt. Run the following command, ensuring to replace "API KEY" with your actual OpenAI API key:
+3. **Installa FFmpeg** (richiesto per l'elaborazione audio):
+   - **Windows**: Scarica da [ffmpeg.org](https://ffmpeg.org/download.html) e aggiungi al PATH
+   - **macOS**: `brew install ffmpeg`
+   - **Linux**: `sudo apt install ffmpeg`
 
-      ```
-      python -c "with open('keys.py', 'w', encoding='utf-8') as f: f.write('OPENAI_API_KEY=\"API KEY\"')"
-      ```
+## Utilizzo
 
-   - Option 2: You can create the keys.py file manually. Open up your text editor of choice and enter the following content:
-   
-      ```
-      OPENAI_API_KEY="API KEY"
-      ```
-      Replace "API KEY" with your actual OpenAI API key. Save this file as keys.py within the ecoute directory.
+### 🚀 Con Voxtral-Mini-3B (Nuovo!)
+```bash
+# Setup automatico
+python setup_voxtral.py
 
-### 🎬 Running Ecoute
+# Interfaccia moderna (consigliata)
+python run_modern.py --voxtral
 
-Run the main script:
-
+# Interfaccia classica
+python main.py --voxtral
 ```
+*Nota: Richiede GPU con 10GB+ VRAM per prestazioni ottimali*
+
+### Avvio Base (FasterWhisper)
+```bash
+# Interfaccia moderna
+python run_modern.py
+
+# Interfaccia classica
 python main.py
 ```
 
-For a more better and faster version that also works with most languages, use:
+### Con OpenVINO (Ottimizzato CPU)
+```bash
+python run_modern.py --openvino
+```
+
+### Con Ollama
+```bash
+python main.py --ollama
+```
+*Nota: Richiede Ollama installato da https://ollama.ai*
+
+### Con OpenAI API
+```bash
+python run_modern.py --api
+```
+*Nota: Richiede una chiave API OpenAI configurata nell'ambiente*
+
+### Controlli dell'Interfaccia
+
+- **Menu Lingua**: Seleziona la lingua per il riconoscimento vocale
+- **Area Trascrizione**: Visualizza le trascrizioni in tempo reale
+- **Pulsante "Cancella Trascrizione"**: Pulisce la cronologia delle trascrizioni
+
+## Lingue Supportate
+
+### Voxtral-Mini-3B (Supporto Nativo)
+- 🇮🇹 **Italiano** (it) - Eccellente
+- 🇺🇸 **Inglese** (en) - Eccellente  
+- 🇪🇸 **Spagnolo** (es) - Eccellente
+- 🇫🇷 **Francese** (fr) - Eccellente
+- 🇩🇪 **Tedesco** (de) - Eccellente
+- 🇵🇹 **Portoghese** (pt) - Eccellente
+- 🇮🇳 **Hindi** (hi) - Eccellente
+- 🇳🇱 **Olandese** (nl) - Eccellente
+
+### Altri Modelli (100+ lingue)
+Tutti gli altri modelli supportano 100+ lingue tramite Whisper
+
+## Modelli di Trascrizione
+
+### 1. **Ollama Whisper** ⭐ **RACCOMANDATO**
+- **Velocità**: Molto veloce
+- **Accuratezza**: Alta
+- **Costo**: Gratuito
+- **Requisiti**: Ollama installato
+- **Comando**: `python main.py --ollama`
+
+### 2. **Faster Whisper** (Default)
+- **Velocità**: Media
+- **Accuratezza**: Buona
+- **Costo**: Gratuito
+- **Requisiti**: GPU opzionale
+- **Comando**: `python main.py`
+
+### 3. **OpenAI Whisper API**
+- **Velocità**: Alta
+- **Accuratezza**: Molto alta
+- **Costo**: $0.006/minuto
+- **Requisiti**: Chiave API
+- **Comando**: `python main.py --api`
+
+## Configurazione
+
+### Variabili d'Ambiente
+
+Per utilizzare l'API OpenAI:
+```bash
+export OPENAI_API_KEY="your-api-key-here"
+```
+
+### Parametri Audio
+
+I parametri di registrazione possono essere modificati in `AudioRecorder.py`:
+- `RECORD_TIMEOUT`: Timeout per la registrazione (default: 3 secondi)
+- `ENERGY_THRESHOLD`: Soglia di energia per il rilevamento vocale
+- `DYNAMIC_ENERGY_THRESHOLD`: Soglia dinamica abilitata/disabilitata
+
+## Struttura del Progetto
 
 ```
-python main.py --api
+ecoute/
+├── main.py                 # Punto di ingresso principale
+├── AudioRecorder.py        # Gestione registrazione audio
+├── AudioTranscriber.py     # Trascrizione audio
+├── TranscriberModels.py    # Modelli di riconoscimento vocale
+├── custom_speech_recognition/  # Libreria personalizzata
+└── requirements.txt        # Dipendenze Python
 ```
 
-Upon initiation, Ecoute will begin transcribing your microphone input and speaker output in real-time. Please note that it might take a few seconds for the system to warm up before the transcription becomes real-time.
+## Risoluzione Problemi
 
-The --api flag will use the whisper api for transcriptions. This significantly enhances transcription speed and accuracy, and it works in most languages (rather than just English without the flag). It's expected to become the default option in future releases. However, keep in mind that using the Whisper API will consume more OpenAI credits than using the local model. This increased cost is attributed to the advanced features and capabilities that the Whisper API provides. Despite the additional expense, the substantial improvements in speed and transcription accuracy may make it a worthwhile investment for your use case.
+### Errore "pyaudiowpatch could not be resolved"
+Assicurati di aver installato PyAudioWPatch:
+```bash
+pip install PyAudioWPatch
+```
 
-### ⚠️ Limitations
+### Errore FFmpeg
+Verifica che FFmpeg sia installato e accessibile dal PATH:
+```bash
+ffmpeg -version
+```
 
-While Ecoute provides real-time transcription and response suggestions, there are several known limitations to its functionality that you should be aware of:
+### Problemi di Performance
+- Per migliori performance, utilizza una GPU CUDA
+- Il modello "base" è più accurato ma più lento del modello "tiny"
 
-**Default Mic and Speaker:** Ecoute is currently configured to listen only to the default microphone and speaker set in your system. It will not detect sound from other devices or systems. If you wish to use a different mic or speaker, you will need to set it as your default device in your system settings.
+## 📚 Documentazione Aggiuntiva
 
-**Whisper Model**: If the --api flag is not used, we utilize the 'tiny' version of the Whisper ASR model, due to its low resource consumption and fast response times. However, this model may not be as accurate as the larger models in transcribing certain types of speech, including accents or uncommon words.
+- 🎙️ **[Guida Voxtral](README_VOXTRAL.md)** - Setup e utilizzo del modello Voxtral-Mini-3B-2507
+- 🔧 **[Guida OpenVINO](README_OPENVINO.md)** - Ottimizzazione CPU con Intel OpenVINO
+- 🎯 **[Interfaccia Moderna](README_MODERN.md)** - Guida all'interfaccia PyQt6
 
-**Language**: If you are not using the --api flag the Whisper model used in Ecoute is set to English. As a result, it may not accurately transcribe non-English languages or dialects. We are actively working to add multi-language support to future versions of the program.
+## Licenza
 
-## 📖 License
+Questo progetto è rilasciato sotto licenza MIT. Vedi il file `LICENSE` per i dettagli.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## Contributi
 
-## 🤝 Contributing
+I contributi sono benvenuti! Per favore:
+1. Fai un fork del progetto
+2. Crea un branch per la tua feature
+3. Committa le modifiche
+4. Apri una Pull Request
 
-Contributions are welcome! Feel free to open issues or submit pull requests to improve Ecoute.
+## Supporto
+
+Per problemi o domande, apri una issue su GitHub.

@@ -25,11 +25,32 @@ def clear_context(transcriber, speaker_queue, mic_queue):
     with mic_queue.mutex:
         mic_queue.queue.clear()
 
+def change_language(transcriber, speaker_queue, mic_queue, language_var):
+    """Cambia la lingua del modello di trascrizione"""
+    new_language = language_var.get()
+    print(f"[INFO] Cambiando lingua a: {new_language}")
+    
+    # Determina quale modello usare
+    use_ollama = '--ollama' in sys.argv
+    use_api = '--api' in sys.argv
+    use_openvino = '--openvino' in sys.argv
+    use_voxtral = '--voxtral' in sys.argv
+    use_openvino_genai = '--openvino-genai' in sys.argv
+    
+    # Ricrea il modello con la nuova lingua
+    new_model = TranscriberModels.get_model(use_api=use_api, language=new_language, use_ollama=use_ollama, use_openvino=use_openvino, use_voxtral=use_voxtral, use_openvino_genai=use_openvino_genai)
+    # Non usare model_var.set() perché converte l'oggetto in stringa
+    # Aggiorna direttamente il modello nel trascrittore
+    transcriber.update_model(new_model)
+    
+    # Pulisci il contesto
+    clear_context(transcriber, speaker_queue, mic_queue)
+
 def create_ui_components(root, transcriber, speaker_queue, mic_queue):
     ctk.set_appearance_mode("dark")
     ctk.set_default_color_theme("dark-blue")
-    root.title("Ecoute")
-    root.geometry("1000x600")
+    root.title("Ecoute - Riconoscimento Vocale")
+    root.geometry("1000x700")
 
     root.grid_columnconfigure(0, weight=1)
     root.grid_rowconfigure(0, weight=1)
@@ -40,6 +61,39 @@ def create_ui_components(root, transcriber, speaker_queue, mic_queue):
     main_frame.grid_columnconfigure(0, weight=1)
     main_frame.grid_rowconfigure(0, weight=1)
     main_frame.grid_rowconfigure(1, weight=0)
+    main_frame.grid_rowconfigure(2, weight=0)
+
+    # Frame per i controlli
+    controls_frame = ctk.CTkFrame(main_frame)
+    controls_frame.grid(row=0, column=0, sticky="ew", padx=10, pady=(10, 5))
+    controls_frame.grid_columnconfigure(0, weight=1)
+    controls_frame.grid_columnconfigure(1, weight=0)
+    controls_frame.grid_columnconfigure(2, weight=0)
+
+    # Label per la lingua
+    language_label = ctk.CTkLabel(controls_frame, text="Lingua:", font=("Arial", 14))
+    language_label.grid(row=0, column=0, sticky="w", padx=10, pady=10)
+
+    # Menu a tendina per la lingua
+    language_var = ctk.StringVar(value="it")
+    language_menu = ctk.CTkOptionMenu(
+        controls_frame,
+        values=["it", "en", "es", "fr", "de"],
+        variable=language_var,
+        command=lambda x: change_language(transcriber, speaker_queue, mic_queue, language_var)
+    )
+    language_menu.grid(row=0, column=1, padx=10, pady=10)
+
+    # Label per mostrare la lingua corrente
+    current_language_label = ctk.CTkLabel(controls_frame, text="Italiano", font=("Arial", 12))
+    current_language_label.grid(row=0, column=2, padx=10, pady=10)
+
+    # Aggiorna la label quando cambia la lingua
+    def update_language_label(*args):
+        lang_map = {"it": "Italiano", "en": "Inglese", "es": "Spagnolo", "fr": "Francese", "de": "Tedesco"}
+        current_language_label.configure(text=lang_map.get(language_var.get(), language_var.get()))
+
+    language_var.trace("w", update_language_label)
 
     transcript_textbox = ctk.CTkTextbox(
         main_frame, 
@@ -47,16 +101,16 @@ def create_ui_components(root, transcriber, speaker_queue, mic_queue):
         text_color='#FFFCF2', 
         wrap="word"
     )
-    transcript_textbox.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+    transcript_textbox.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
 
     clear_button = ctk.CTkButton(
         main_frame, 
-        text="Clear Transcript", 
+        text="Cancella Trascrizione", 
         command=lambda: clear_context(transcriber, speaker_queue, mic_queue)
     )
-    clear_button.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 10))
+    clear_button.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 10))
 
-    return transcript_textbox
+    return transcript_textbox, language_var
 
 def main():
     try:
@@ -77,16 +131,23 @@ def main():
     speaker_audio_recorder = AudioRecorder.DefaultSpeakerRecorder()
     speaker_audio_recorder.record_into_queue(speaker_queue)
 
-    model = TranscriberModels.get_model('--api' in sys.argv)
+    # Determina quale modello usare
+    use_ollama = '--ollama' in sys.argv
+    use_api = '--api' in sys.argv
+    use_openvino = '--openvino' in sys.argv
+    use_voxtral = '--voxtral' in sys.argv
+    use_openvino_genai = '--openvino-genai' in sys.argv
+    
+    initial_model = TranscriberModels.get_model(use_api=use_api, language="it", use_ollama=use_ollama, use_openvino=use_openvino, use_voxtral=use_voxtral, use_openvino_genai=use_openvino_genai)
 
-    transcriber = AudioTranscriber(user_audio_recorder.source, speaker_audio_recorder.source, model)
+    transcriber = AudioTranscriber(user_audio_recorder.source, speaker_audio_recorder.source, initial_model)
     transcribe = threading.Thread(target=transcriber.transcribe_audio_queue, args=(speaker_queue, mic_queue))
     transcribe.daemon = True
     transcribe.start()
 
-    transcript_textbox = create_ui_components(root, transcriber, speaker_queue, mic_queue)
+    transcript_textbox, language_var = create_ui_components(root, transcriber, speaker_queue, mic_queue)
 
-    print("READY")
+    print("PRONTO - Supporto Italiano Attivo")
 
     update_transcript_UI(transcriber, transcript_textbox)
 

@@ -2,3 +2,5 @@ __pycache__/
 *.wav
 keys.py
 .venv/
+whisper-large-v3-turbo-int8/
+whisper-tiny-int8-ov/
